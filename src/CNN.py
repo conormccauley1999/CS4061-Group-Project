@@ -1,9 +1,8 @@
 import numpy as np
 import pandas as pd
-from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
-from sklearn.svm import SVC
-import time
+from tensorflow import keras
+from keras.models import Sequential
+from keras.layers import Conv1D, MaxPooling1D
 
 
 def get_features(data):
@@ -20,20 +19,29 @@ def get_features(data):
 
 def main(data):
     X, Y = get_features(data)
-    start = time.time()
-    clf = MLPClassifier(random_state=1, max_iter=500, alpha=0.1)
-    clf.fit(X, Y.ravel())
-    y_pred = clf.predict(X)
+    split = len(data)//2
 
-    for y in range(len(y_pred)):
-        print("Predicted: %i, Actual: %i" % (y_pred[y], Y[y]))
-    end = time.time()
+    X_train, X_test =X[:split], X[split:]
+    y_train, y_test = Y[:split], Y[split:]
 
-    print("−−−−−−−−−−−ExecutionTime: % fs −−−−−−−−−−−−−" % (end - start))
-    print(classification_report(Y, y_pred))
-    print(confusion_matrix(Y, y_pred))
-    print("Accuracy %f" % (accuracy_score(Y, y_pred)))
+    model = keras.Sequential()
 
+    # Building the CNN Model
+    model = Sequential()
+    model.add(Conv1D(8, activation='relu', kernel_size=2, input_shape=(60, 1)))
+    model.add(Conv1D(8, activation='relu', kernel_size=2))
+    model.add(MaxPooling1D(pool_size=2))
+    model.add(Conv1D(16, activation='relu', kernel_size=3))
+    model.add(Conv1D(16, activation='relu', kernel_size=3))
+
+    # Fitting the data onto model
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.fit(X_train, y_train.ravel(), validation_data=(X_train, y_train.ravel()), epochs=2, batch_size=128, verbose=2)
+    model.summary()
+
+    scores = model.evaluate(X_test, y_test, verbose=0)
+    # Displays the accuracy of correct sentiment prediction over test data
+    print("Accuracy: %.2f%%" % (scores[1] * 100))
 
 data = pd.read_csv('dataset.csv').values.tolist()
 main(data)
