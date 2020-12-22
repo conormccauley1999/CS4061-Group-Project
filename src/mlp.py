@@ -45,7 +45,7 @@ def cross_val(X, Y):
         dummy = DummyClassifier(strategy='most_frequent').fit(X, Y)
         bscores = cross_val_score(dummy, X, Y, cv=5, scoring='accuracy')
 
-        dummyR = DummyClassifier(strategy='random').fit(X, Y)
+        dummyR = DummyClassifier(strategy='uniform').fit(X, Y)
         brscores = cross_val_score(dummyR, X, Y, cv=5, scoring='accuracy')
 
         brmeans.append(brscores.mean())
