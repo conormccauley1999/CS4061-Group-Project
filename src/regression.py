@@ -41,6 +41,7 @@ def lin_reg_cv(X, Y):
         print(f'C = {C} >> ({means[-1]}, {stds[-1]})')
     return
 
+
 def log_reg_cv(X, Y):
     means, stds = [], []
     C_range = [0.1, 1, 10]
