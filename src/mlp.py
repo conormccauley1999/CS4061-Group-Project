@@ -32,15 +32,18 @@ def read_data(data_file, indexes):
     return X, Y
 
 
-def cross_val(X, Y):
-    means, stds = [], []
+def select_C(X, Y):
+    means, stds, times = [], [], []
     bmeans, bstds = [], []
     brmeans, brstds = [], []
     c_range = [0,  0.0001, 0.01, 0.1, 10, 20, 50, 100]
+
     for C in c_range:
+        start = time.time()
         a = 1 / 2*C
         model = MLPClassifier(random_state=1, hidden_layer_sizes = 5, max_iter=500, alpha=a)
         scores = cross_val_score(model, X, Y, cv=5, scoring='accuracy')
+        end = time.time()
 
         dummy = DummyClassifier(strategy='most_frequent').fit(X, Y)
         bscores = cross_val_score(dummy, X, Y, cv=5, scoring='accuracy')
@@ -56,26 +59,15 @@ def cross_val(X, Y):
 
         means.append(scores.mean())
         stds.append(scores.std())
-        print(f'alpha = {a} >> ({means[-1]}, {stds[-1]})')
-    plotM(means, stds, c_range, bmeans, bstds, brmeans, brstds)
-    return
-def select_C(X, Y):
-    means, stds, times = [], [], []
-    alpha_range = [0.01, 0.1, 1, 10, 100]
-    for a in alpha_range:
-        start = time.time()
-        model = MLPClassifier(max_iter=500, alpha=a)
-        scores = cross_val_score(model, X, Y, cv=5, scoring='accuracy')
-        end = time.time()
-        means.append(scores.mean())
-        stds.append(scores.std())
-        times.append(end-start)
-        print(f'alpha = {a} >> ({means[-1]}, {stds[-1]}) >> {times[-1]}s')
+        times.append(end - start)
+
+        print(f'C = {C} >> ({means[-1]}, {stds[-1]}) >> time: {times[-1]}s')
+    plot_cross_vals(means, stds, c_range, bmeans, bstds, brmeans, brstds)
 
 
 def select_hl(X, Y):
     means, stds, times = [], [], []
-    hl_range = [(5,)(10,)]
+    hl_range = [(5,),(10,)]
     for hl in hl_range:
         start = time.time()
         model = MLPClassifier(max_iter=500, hidden_layer_sizes=hl, alpha=1)
@@ -84,10 +76,20 @@ def select_hl(X, Y):
         means.append(scores.mean())
         stds.append(scores.std())
         times.append(end - start)
-        print(f'hidden_layers = {hl} >> ({means[-1]}, {stds[-1]}) >> {times[-1]}s')
+        print(f'hidden_layers = {hl} >> ({means[-1]}, {stds[-1]}) >> time: {times[-1]}s')
 
 
-def roc(X_train,y_train, z):
+def plot_cross_vals(means, stds, a, bmeans, bstds, brmeans, brstds ):
+    plt.errorbar(a,means,yerr=stds, ecolor = "red", label = "MLP Classifier")
+    plt.errorbar(a,bmeans,yerr=bstds, ecolor = "blue", label = "Baseline (Frequent)")
+    plt.errorbar(a,brmeans,yerr=brstds, ecolor = "purple", label = "Baseline (Random)")
+    plt.xlabel('C'); plt.ylabel('Accuracy')
+    plt.legend()
+    plt.show()
+    return
+
+
+def plot_roc(X_train,y_train, z):
     if z==1:
         classes = [1,2,3,4,5,6,7]
     else:
@@ -154,7 +156,7 @@ def roc(X_train,y_train, z):
     plt.show()
 
 
-def mlp(X, Y):
+def class_report(X, Y):
     start = time.time()
     a = 0.1
     clf = MLPClassifier(random_state=1, max_iter=500, hidden_layer_sizes=41, alpha=a)
@@ -165,20 +167,11 @@ def mlp(X, Y):
     print(confusion_matrix(Y.ravel(), y_pred))
     scores = cross_val_score(clf, X, Y, cv=5, scoring='accuracy')
     print(f'alpha = {a} >> ({scores.mean()}, {scores.std()})')
-
     print("−−−−−−−−−−−ExecutionTime: % fs −−−−−−−−−−−−−" % (end - start))
     return
 
-def plotM(means, stds, a, bmeans, bstds, brmeans, brstds ):
-    plt.errorbar(a,means,yerr=stds, ecolor = "red", label = "MLP Classifier")
-    plt.errorbar(a,bmeans,yerr=bstds, ecolor = "blue", label = "Baseline (Frequent)")
-    plt.errorbar(a,brmeans,yerr=brstds, ecolor = "purple", label = "Baseline (Random)")
-    plt.xlabel('C'); plt.ylabel('Accuracy')
-    plt.legend()
-    plt.show()
-    return
 
-def confusion_matrix(X,Y):
+def plot_conf_matrix(X,Y):
     model = MLPClassifier(max_iter=500, hidden_layer_sizes=(5,), alpha=1).fit(X,Y)
     plot_confusion_matrix(model, X, Y)
     plt.show()
@@ -187,10 +180,6 @@ def main():
     all_indexes = list(range(len(QUESTIONS)))
     X_std, Y_std = read_data(DATA_FILE_STANDARD, all_indexes)
     X_3c, Y_3c = read_data(DATA_FILE_3_CLASS, all_indexes)
-    # mlp(X_std, Y_std)
-    # mlp(X_3c, Y_3c)
-    cross_val(X_3c, Y_3c)
-    return
 
     # Cross Validation
     # select_hl(X_std, Y_std)
@@ -199,12 +188,12 @@ def main():
     # select_c(X_3c, Y_3c)
 
     # ROC for 3 class and 7 class
-    #roc(X_3c, Y_3c, 0)
-    #roc(X_std, Y_std, 1)
+    # plot_roc(X_3c, Y_3c, 0)
+    # plot_roc(X_std, Y_std, 1)
 
     # Confusion Matrix
-    confusion_matrix(X_std, Y_std)
-    confusion_matrix(X_3c, Y_3c)
+    plot_conf_matrix(X_std, Y_std)
+    plot_conf_matrix(X_3c, Y_3c)
 
 main()
 
