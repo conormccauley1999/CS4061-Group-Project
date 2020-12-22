@@ -6,7 +6,7 @@ from sklearn.neural_network import MLPClassifier
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import label_binarize
-from sklearn.metrics import roc_curve, auc
+from sklearn.metrics import plot_confusion_matrix, roc_curve, auc
 import time
 import matplotlib.pyplot as plt
 from itertools import cycle
@@ -141,25 +141,29 @@ def mlp(X, Y):
     print("−−−−−−−−−−−ExecutionTime: % fs −−−−−−−−−−−−−" % (end - start))
     return
 
+def confusion_matrix(X,Y):
+    model = MLPClassifier(max_iter=500, hidden_layer_sizes=(5,), alpha=1).fit(X,Y)
+    plot_confusion_matrix(model, X, Y)
+    plt.show()
 
 def main():
     all_indexes = list(range(len(QUESTIONS)))
     X_std, Y_std = read_data(DATA_FILE_STANDARD, all_indexes)
     X_3c, Y_3c = read_data(DATA_FILE_3_CLASS, all_indexes)
 
-    # mlp(X_std, Y_std)
-    # mlp(X_3c, Y_3c)
-
-    # cross_val
+    # Cross Validation
     # select_hl(X_std, Y_std)
     # select_hl(X_3c, Y_3c)
     # select_c(X_std,Y_std)
     # select_c(X_3c, Y_3c)
 
-    # ROC for 3 class
-    roc(X_3c, Y_3c, 0)
-    # ROC for 7 class
-    roc(X_std, Y_std, 1)
+    # ROC for 3 class and 7 class
+    #roc(X_3c, Y_3c, 0)
+    #roc(X_std, Y_std, 1)
+
+    # Confusion Matrix
+    confusion_matrix(X_std, Y_std)
+    confusion_matrix(X_3c, Y_3c)
 
 main()
 
