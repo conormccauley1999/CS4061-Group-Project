@@ -3,12 +3,14 @@
 IN_FILE = '..\data\original.csv'
 OUT_FILE_STANDARD = '..\data\converted_std.csv'
 OUT_FILE_3_CLASS = '..\data\converted_3c.csv'
+
 ANSWER_MAP = {
     -1: 1,
     -0.65: 2,
     0.65: 3,
     1: 4
 }
+
 ALIGNMENT_MAP_STANDARD = {
     1: 1,
     2: 2,
@@ -18,6 +20,7 @@ ALIGNMENT_MAP_STANDARD = {
     6: 6,
     7: 7
 }
+
 ALIGNMENT_MAP_3_CLASS = {
     1: 1,
     2: 1,
@@ -27,6 +30,7 @@ ALIGNMENT_MAP_3_CLASS = {
     6: 3,
     7: 3
 }
+
 
 def main(alignment_map, out_file):
     content = ''
