@@ -36,7 +36,7 @@ def select_C(X, Y):
     means, stds, times = [], [], []
     bmeans, bstds = [], []
     brmeans, brstds = [], []
-    c_range = [0,  0.0001, 0.01, 0.1, 10, 20, 50, 100]
+    c_range = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100]
 
     for C in c_range:
         start = time.time()
@@ -184,16 +184,16 @@ def main():
     # Cross Validation
     # select_hl(X_std, Y_std)
     # select_hl(X_3c, Y_3c)
-    # select_c(X_std,Y_std)
-    # select_c(X_3c, Y_3c)
+    select_C(X_std,Y_std)
+    select_C(X_3c, Y_3c)
 
     # ROC for 3 class and 7 class
     # plot_roc(X_3c, Y_3c, 0)
     # plot_roc(X_std, Y_std, 1)
 
     # Confusion Matrix
-    plot_conf_matrix(X_std, Y_std)
-    plot_conf_matrix(X_3c, Y_3c)
+    #plot_conf_matrix(X_std, Y_std)
+    #plot_conf_matrix(X_3c, Y_3c)
 
 main()
 
