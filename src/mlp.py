@@ -1,5 +1,4 @@
 from constants import *
-from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
 from sklearn.neural_network import MLPClassifier
@@ -36,7 +35,7 @@ def select_C(X, Y):
     means, stds, times = [], [], []
     bmeans, bstds = [], []
     brmeans, brstds = [], []
-    c_range = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100]
+    c_range = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10]
 
     for C in c_range:
         start = time.time()
@@ -48,7 +47,7 @@ def select_C(X, Y):
         dummy = DummyClassifier(strategy='most_frequent').fit(X, Y)
         bscores = cross_val_score(dummy, X, Y, cv=5, scoring='accuracy')
 
-        dummyR = DummyClassifier(strategy='uniform').fit(X, Y)
+        dummyR = DummyClassifier(strategy='random').fit(X, Y)
         brscores = cross_val_score(dummyR, X, Y, cv=5, scoring='accuracy')
 
         brmeans.append(brscores.mean())
@@ -67,7 +66,7 @@ def select_C(X, Y):
 
 def select_hl(X, Y):
     means, stds, times = [], [], []
-    hl_range = [(5,),(10,)]
+    hl_range = [(5,),(5,5),(10,),(10,10)]
     for hl in hl_range:
         start = time.time()
         model = MLPClassifier(max_iter=500, hidden_layer_sizes=hl, alpha=1)
@@ -158,17 +157,16 @@ def plot_roc(X_train,y_train, z):
 
 def class_report(X, Y):
     start = time.time()
-    a = 0.1
-    clf = MLPClassifier(random_state=1, max_iter=500, hidden_layer_sizes=41, alpha=a)
+    a = 1/2*1
+    clf = MLPClassifier(random_state=1, max_iter=500, hidden_layer_sizes=(5,), alpha=a)
     clf.fit(X, Y.ravel())
     y_pred = clf.predict(X)
     end = time.time()
     print(classification_report(Y.ravel(), y_pred))
     print(confusion_matrix(Y.ravel(), y_pred))
-    scores = cross_val_score(clf, X, Y, cv=5, scoring='accuracy')
-    print(f'alpha = {a} >> ({scores.mean()}, {scores.std()})')
+    # scores = cross_val_score(clf, X, Y, cv=5, scoring='accuracy')
+    # print(f'alpha = {a} >> ({scores.mean()}, {scores.std()})')
     print("−−−−−−−−−−−ExecutionTime: % fs −−−−−−−−−−−−−" % (end - start))
-    return
 
 
 def plot_conf_matrix(X,Y):
@@ -183,17 +181,19 @@ def main():
 
     # Cross Validation
     # select_hl(X_std, Y_std)
-    # select_hl(X_3c, Y_3c)
-    select_C(X_std,Y_std)
-    select_C(X_3c, Y_3c)
+    #select_hl(X_3c, Y_3c)
+    # select_c(X_std,Y_std)
+    # select_c(X_3c, Y_3c)
 
     # ROC for 3 class and 7 class
-    # plot_roc(X_3c, Y_3c, 0)
-    # plot_roc(X_std, Y_std, 1)
+    # _roc(X_3c, Y_3c, 0)
+    #plot_roc(X_std, Y_std, 1)
 
     # Confusion Matrix
     #plot_conf_matrix(X_std, Y_std)
     #plot_conf_matrix(X_3c, Y_3c)
 
+    # class_report(X_3c, Y_3c)
+    class_report(X_std, Y_std)
 main()
 
